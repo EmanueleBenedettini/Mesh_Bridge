@@ -52,13 +52,14 @@ def publish(client, topic, message):
 def message_handler(mqtt_data, client_data, data):
     #check if packet has already been received
     if data["sender"] == client_data.user_id:
-        client_data.last_packet = data
         if data == client_data.last_packet:
             print("packet already processed")
-            return
+            return  #packet already processed last time
     else: 
         print("packet received from self")
-        return
+        return  #trash everything pubblished different from the specified meshtastic client id for that topic
+    
+    client_data.last_packet = data
         
     i_from = data["from"]   #just for debug
     i_to = data["to"]
