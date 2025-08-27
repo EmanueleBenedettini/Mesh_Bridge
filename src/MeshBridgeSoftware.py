@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import json, time
 from paho.mqtt import client as mqtt_client
+from paho.mqtt.subscribeoptions import SubscribeOptions
 from queue import Queue
 
 class MqttClientData:
@@ -16,8 +17,9 @@ def on_connect(client, userdata, flags, rc):
         print("Connected to broker")
         global conn
         conn = client
+        options = SubscribeOptions(qos=1, noLocal=True)
         for temp in mqtt_data:
-            client.subscribe(temp.topic)
+            client.subscribe(temp.topic, options=options)
     else:
         print(f"Connection failed rc{rc}")
 
