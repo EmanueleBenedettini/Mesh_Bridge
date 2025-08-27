@@ -29,7 +29,7 @@ def on_message(client, userdata, msg):
     try:
         data = json.loads(msg.payload)
         # Process the JSON data as needed
-        if data["sender"] != userdata.user_id:
+        if data["sender"] == userdata.user_id:
             userdata.packet_queue.put(data)
     except Exception as e:
         print(f"Failed to process JSON data due to error: {e}")
