@@ -1,0 +1,18 @@
+{
+    "broker": {
+        "host": "localhost",
+        "port": 1883,
+        "client_id": "Mesh-Bridge",
+        "password": "|Lello97"
+    },
+    "clients":[
+        {
+            "node_number": 2224783452,
+            "json_topic": "msh/master/2/json/MediumFast/!849b805c" 
+        },
+        {
+            "node_number": 3676919412,
+            "json_topic": "msh/slave/2/json/LongFast/!db295674" 
+        }
+    ]
+}
