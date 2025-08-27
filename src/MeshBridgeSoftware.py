@@ -26,7 +26,7 @@ def on_message(client, userdata, msg):
 
 def publish(client, topic, message):
     result = client.publish(topic, json.dumps(message))
-    result.wait_for_publication()
+    result.wait_for_publish()
     if result[0] == 0:
         print("Successfully published")
     else:
