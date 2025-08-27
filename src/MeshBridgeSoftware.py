@@ -5,10 +5,12 @@ from paho.mqtt.subscribeoptions import SubscribeOptions
 from queue import Queue
 
 class MqttClientData:
-    def __init__(self, topic, node_id, user_id, last_packet=None):
+    def __init__(self, topic, node_id, user_id, client, max_cue_lenght=10, last_packet=None):
         self.topic = topic
         self.node_id = node_id
         self.user_id = user_id
+        self.client = client
+        packet_queue = Queue(maxsize=max_cue_lenght)
         self.last_packet = last_packet if last_packet is not None else {}
 
 
@@ -27,9 +29,8 @@ def on_message(client, userdata, msg):
     try:
         data = json.loads(msg.payload)
         # Process the JSON data as needed
-        print(userdata)
-        print(data)
-        handler(client, data)
+        #handler(client, data)
+        userdata.put(data)
     except Exception as e:
         print(f"Failed to process JSON data due to error: {e}")
     
@@ -38,17 +39,17 @@ def publish(client, topic, message):
     result = client.publish(topic, json.dumps(message))
     result.wait_for_publish()
     if result[0] == 0:
-        print("Successfully published")
+        print(f"Successfully published: type={message["type"]}")
     else:
         print("Failed to publish message")
 
-#just for testing
-def handler(client, data):
-#    print(f"Handling message...")
-    packet_queue.put(data)
-#    print("done handling")
+##just for testing
+#def handler(client, data):
+##    print(f"Handling message...")
+#    packet_queue.put(data)
+##    print("done handling")
 
-def message_decoder_and_sender(client, data):
+def message_handler(client, data):
     #check if packet has already been received
     for temp in mqtt_data:
         if data == temp.last_packet:
@@ -63,6 +64,8 @@ def message_decoder_and_sender(client, data):
         if data["sender"] != temp.user_id:
             publish(client, temp.topic, data)
 
+
+
 def main():
     #Read configs
     with open("config.json") as f:
@@ -72,42 +75,49 @@ def main():
     mqtt_client_id = config["broker"]["client_id"]
     mqtt_password = config["broker"]["password"]
 
-    global mqtt_data
-    global packet_queue
+    global mqtt_data    #contains a list of MqttClientData structures, one for each client
     mqtt_data = []
-    packet_queue = Queue(maxsize=50)
 
     for data in config["clients"]:
         print(data)
         if "node_number" not in data or "json_topic" not in data or "user_id" not in data:
             print(f"Error: missing properties 'node_number' or 'json_topic' or 'user_id' for client {data}")
             continue
-        mqtt_data.append(MqttClientData(data["json_topic"], int(data["node_number"]), data["user_id"]))
+        # Create a new client data
+        mqtt_data.append(
+            MqttClientData(data["json_topic"], 
+            int(data["node_number"]), 
+            data["user_id"]),
+            mqtt_client.Client(mqtt_client_id + len(mqtt_data)) # Create a new MQTT client instance
+            )
+        
 
     if len(mqtt_data) < 2:
         print("Error: not enough topics subscribed (<2)")
         exit(1)
 
-    # Create a new MQTT client instance
-    client = mqtt_client.Client(mqtt_client_id)
-
-    # Set callbacks for on_connect and on_message events
-    client.on_connect = on_connect
-    client.on_message = on_message
-
-    # Connect to the MQTT broker with the specified parameters
-    client.username_pw_set(mqtt_client_id, mqtt_password)
-    client.connect(mqtt_broker, mqtt_port)
-
-    # Start the loop for processing incoming messages and event callbacks
-    client.loop_start()
+    for temp in mqtt_data:
+        client = temp.client
+        # cue passtrough to clients
+        client.user_data_set(temp.packet_queue)
+        # Set callbacks for on_connect and on_message events
+        client.on_connect = on_connect
+        client.on_message = on_message
+        # Connect to the MQTT broker with the specified parameters
+        client.username_pw_set(mqtt_client_id, mqtt_password)
+        client.connect(mqtt_broker, mqtt_port)
+        # Start the loop for processing incoming messages and event callbacks
+        client.loop_start()
 
     while True:
-        while packet_queue.qsize() > 1:
-            message_decoder_and_sender(client, packet_queue.get())
-        else:
+        queue_emptied = False
+        for client_data in mqtt_data: 
+            while client_data.packet_queue.qsize() > 1:
+                message_handler(client_data.client, client_data.packet_queue.get())
+                queue_emptied = True
+        if not queue_emptied:   # If I did some work, don't sleep
             print("Queue empty, waiting...")
-            time.sleep(1)   #do nothing
+            time.sleep(2)   #do nothing
 
 
 if __name__ == "__main__":
