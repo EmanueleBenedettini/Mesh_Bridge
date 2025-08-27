@@ -17,8 +17,8 @@ class MqttClientData:
 def on_connect(client, userdata, flags, rc):
     if rc == 0:
         print("Connected to broker")
-        global conn
-        conn = client
+        #global conn
+        #conn = client
         options = SubscribeOptions(qos=1, noLocal=True)
         for temp in mqtt_data:
             client.subscribe(temp.topic, options=options)
@@ -29,8 +29,8 @@ def on_message(client, userdata, msg):
     try:
         data = json.loads(msg.payload)
         # Process the JSON data as needed
-        #handler(client, data)
-        userdata.put(data)
+        if data["sender"] != userdata.user_id:
+            userdata.packet_queue.put(data)
     except Exception as e:
         print(f"Failed to process JSON data due to error: {e}")
     
@@ -104,7 +104,7 @@ def main():
     for temp in mqtt_data:
         client = temp.client
         # cue passtrough to clients
-        client.user_data_set(temp.packet_queue)
+        client.user_data_set(temp)
         # Set callbacks for on_connect and on_message events
         client.on_connect = on_connect
         client.on_message = on_message
