@@ -32,8 +32,9 @@ def publish(client, topic, message):
     else:
         print("Failed to publish message")
 
+#just for testing
 def handler(client, data):
-    if data["sender"] is not "!849b805c"
+    if data["sender"] is not "!849b805c":
         publish(client, mqtt_topics[1], data)
     else:
         publish(client, mqtt_topics[0], data)
