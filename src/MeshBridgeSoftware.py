@@ -55,12 +55,10 @@ def message_handler(mqtt_data, client_data, data):
         if data == client_data.last_packet:
             print("packet already processed")
             return  #packet already processed last time
-        try:
-            if data["timestamp"] < client_data.last_packet["timestamp"]:
+        if client_data.last_packet in dir():    #if value is set
+            if data["timestamp"] < client_data.last_packet["timestamp"]:    #if value is old
                 print("Old message, trashed")
                 return #old message
-        except NameError:
-            pass
     else: 
         print("packet received from self")
         return  #trash everything pubblished different from the specified meshtastic client id for that topic
