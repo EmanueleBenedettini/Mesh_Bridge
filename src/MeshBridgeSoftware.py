@@ -39,7 +39,7 @@ def publish(client, topic, message):
     result = client.publish(topic, json.dumps(message))
     result.wait_for_publish()
     if result[0] == 0:
-        print(f"Successfully published: type={message["type"]}")
+        print(f"Successfully published")
     else:
         print("Failed to publish message")
 
