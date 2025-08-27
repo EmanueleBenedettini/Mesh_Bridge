@@ -3,13 +3,21 @@ import json, time
 from paho.mqtt import client as mqtt_client
 
 
+class MqttClientData:
+    def __init__(self, topic, node_id, user_id, last_packet=None):
+        self.topic = topic
+        self.node_id = node_id
+        self.user_id = user_id
+        self.last_packet = last_packet if last_packet is not None else {}
+
+
 def on_connect(client, userdata, flags, rc):
     if rc == 0:
         print("Connected to broker")
         global conn
         conn = client
-        for topic in mqtt_topics:
-            client.subscribe(topic)
+        for temp in mqtt_data:
+            client.subscribe(temp.topic)
     else:
         print(f"Connection failed rc{rc}")
 
@@ -35,10 +43,20 @@ def publish(client, topic, message):
 #just for testing
 def handler(client, data):
     print(f"Handling message...")
-    if data["sender"] is not "!849b805c":
-        publish(client, mqtt_topics[1], data)
-    else:
-        publish(client, mqtt_topics[0], data)
+    #check if packet has already been received
+    for temp in mqtt_data:
+        if data == temp.last_packet:
+            print("packet already processed")
+            return
+        else:
+            if data["sender"] == temp.user_id:
+                temp.last_packet = data
+
+    #if it's the first time hearing it, transmit to every topic different from origin
+    for temp in mqtt_data:
+        if data["sender"] != temp.user_id:
+            publish(client, temp.topic, data)
+
     print("done handling")
 
 def main():
@@ -50,23 +68,18 @@ def main():
     mqtt_client_id = config["broker"]["client_id"]
     mqtt_password = config["broker"]["password"]
 
-    global mqtt_topics
-    global mqtt_nodes_id
-    global mqtt_user_id
-    mqtt_topics = []
-    mqtt_user_id = []
-    mqtt_nodes_id = []
+    global mqtt_data
+    mqtt_data = []
 
     for data in config["clients"]:
         print(data)
         if "node_number" not in data or "json_topic" not in data or "user_id" not in data:
             print(f"Error: missing properties 'node_number' or 'json_topic' or 'user_id' for client {data}")
             continue
-        mqtt_nodes_id.append(int(data["node_number"]))
-        mqtt_user_id.append(data["user_id"])
-        mqtt_topics.append(data["json_topic"])
+        mqtt_data.append(MqttClientData(data["json_topic"], int(data["node_number"]), data["user_id"]))
 
-    if not mqtt_topics:
+    if len(mqtt_data) < 2:
+        print("Error: not enough topics subscribed (<2)")
         exit(1)
 
     # Create a new MQTT client instance
