@@ -49,20 +49,22 @@ def publish(client, topic, message):
 #    packet_queue.put(data)
 ##    print("done handling")
 
-def message_handler(client, data):
+def message_handler(mqtt_data, client_data, data):
     #check if packet has already been received
-    for temp in mqtt_data:
-        if data == temp.last_packet:
+    if data["sender"] == client_data.user_id:
+        client_data.last_packet = data
+        if data == client_data.last_packet:
             print("packet already processed")
             return
-        else:
-            if data["sender"] == temp.user_id:
-                temp.last_packet = data
+    else: 
+        print("packet received from self")
+        return
+        
 
     #if it's the first time hearing it, transmit to every topic different from origin
     for temp in mqtt_data:
-        if data["sender"] != temp.user_id:
-            publish(client, temp.topic, data)
+        if client_data.user_id != temp.user_id:
+            publish(client_data.client, temp.topic, data)
 
 
 
@@ -112,7 +114,7 @@ def main():
         queue_emptied = False
         for client_data in mqtt_data: 
             while client_data.packet_queue.qsize() > 1:
-                message_handler(client_data.client, client_data.packet_queue.get())
+                message_handler(mqtt_data, client_data, client_data.packet_queue.get())
                 queue_emptied = True
         if not queue_emptied:   # If I did some work, don't sleep
             print("Queue empty, waiting...")
