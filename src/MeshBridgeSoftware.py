@@ -43,7 +43,7 @@ def publish(client, topic, message):
 #just for testing
 def handler(client, data):
 #    print(f"Handling message...")
-    packet_queue.append(data)
+    packet_queue.put(data)
 #    print("done handling")
 
 def message_decoder_and_sender(client, data):
