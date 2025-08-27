@@ -104,6 +104,7 @@ def main():
         while packet_queue.qsize() > 1:
             message_decoder_and_sender(client, packet_queue.get())
         else:
+            print("Queue empty, waiting...")
             time.sleep(1)   #do nothing
 
 
