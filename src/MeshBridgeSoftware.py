@@ -88,7 +88,7 @@ def main():
         nid = int(data["node_number"])
         uid = data["user_id"]
         client = mqtt_client.Client(mqtt_client_id + str(len(mqtt_data)))
-        mqtt_data.append(topic, nid, uid, client)  # Create a new MQTT client instance
+        mqtt_data.append(MqttClientData(topic, nid, uid, client))  # Create a new MQTT client instance
         
 
     if len(mqtt_data) < 2:
