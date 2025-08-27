@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import json, time
 from paho.mqtt import client as mqtt_client
-
+from queue import Queue
 
 class MqttClientData:
     def __init__(self, topic, node_id, user_id, last_packet=None):
@@ -42,7 +42,11 @@ def publish(client, topic, message):
 
 #just for testing
 def handler(client, data):
-    print(f"Handling message...")
+#    print(f"Handling message...")
+    packet_queue.append(data)
+#    print("done handling")
+
+def message_decoder_and_sender(client, data):
     #check if packet has already been received
     for temp in mqtt_data:
         if data == temp.last_packet:
@@ -56,8 +60,6 @@ def handler(client, data):
     for temp in mqtt_data:
         if data["sender"] != temp.user_id:
             publish(client, temp.topic, data)
-
-    print("done handling")
 
 def main():
     #Read configs
@@ -96,8 +98,12 @@ def main():
     # Start the loop for processing incoming messages and event callbacks
     client.loop_start()
 
+    queue = Queue(maxsize=50)
     while True:
-        time.sleep(1)
+        while queue.qsize() > 1:
+            message_decoder_and_sender(client, queue.get())
+        else:
+            time.sleep(1)   #do nothing
 
 
 if __name__ == "__main__":
