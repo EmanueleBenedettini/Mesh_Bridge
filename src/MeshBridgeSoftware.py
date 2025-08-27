@@ -87,7 +87,7 @@ def main():
         topic = data["json_topic"]
         nid = int(data["node_number"])
         uid = data["user_id"]
-        client = mqtt_client.Client(mqtt_client_id + len(mqtt_data))
+        client = mqtt_client.Client(mqtt_client_id + str(len(mqtt_data)))
         mqtt_data.append(topic, nid, uid, client)  # Create a new MQTT client instance
         
 
