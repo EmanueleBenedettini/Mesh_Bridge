@@ -84,11 +84,11 @@ def main():
             print(f"Error: missing properties 'node_number' or 'json_topic' or 'user_id' for client {data}")
             continue
         # Create new client data
-        client = MqttClientData(data["json_topic"])
+        topic = data["json_topic"]
         nid = int(data["node_number"])
         uid = data["user_id"]
         client = mqtt_client.Client(mqtt_client_id + len(mqtt_data))
-        mqtt_data.append(client, nid, uid, client)  # Create a new MQTT client instance
+        mqtt_data.append(topic, nid, uid, client)  # Create a new MQTT client instance
         
 
     if len(mqtt_data) < 2:
