@@ -1,6 +1,6 @@
 {
     "broker": {
-        "host": "localhost",
+        "host": "Mesh-Bridge.local",
         "port": 1883,
         "client_id": "Mesh-Bridge",
         "password": "|Lello97"
