@@ -34,10 +34,12 @@ def publish(client, topic, message):
 
 #just for testing
 def handler(client, data):
+    print(f"Handling message from {data["sender"]...}")
     if data["sender"] is not "!849b805c":
         publish(client, mqtt_topics[1], data)
     else:
         publish(client, mqtt_topics[0], data)
+    print("done handling")
 
 def main():
     #Read configs
