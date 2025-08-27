@@ -71,7 +71,9 @@ def main():
     mqtt_password = config["broker"]["password"]
 
     global mqtt_data
+    global packet_queue
     mqtt_data = []
+    packet_queue = Queue(maxsize=50)
 
     for data in config["clients"]:
         print(data)
@@ -98,10 +100,9 @@ def main():
     # Start the loop for processing incoming messages and event callbacks
     client.loop_start()
 
-    queue = Queue(maxsize=50)
     while True:
-        while queue.qsize() > 1:
-            message_decoder_and_sender(client, queue.get())
+        while packet_queue.qsize() > 1:
+            message_decoder_and_sender(client, packet_queue.get())
         else:
             time.sleep(1)   #do nothing
 
