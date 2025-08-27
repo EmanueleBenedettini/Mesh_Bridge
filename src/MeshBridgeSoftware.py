@@ -60,7 +60,9 @@ def message_handler(mqtt_data, client_data, data):
         print("packet received from self")
         return
         
-
+    i_from = data["from"]   #just for debug
+    i_to = data["to"]
+    print(f"Publishing message from {i_from} to {i_to}")
     #if it's the first time hearing it, transmit to every topic different from origin
     for temp in mqtt_data:
         if client_data.user_id != temp.user_id:
