@@ -10,7 +10,7 @@ class MqttClientData:
         self.node_id = node_id
         self.user_id = user_id
         self.client = client
-        packet_queue = Queue(maxsize=max_cue_lenght)
+        self.packet_queue = Queue(maxsize=max_cue_lenght)
         self.last_packet = last_packet if last_packet is not None else {}
 
 
