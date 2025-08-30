@@ -51,9 +51,8 @@ def on_connect(client, userdata, flags, rc):
     if rc == 0:
         print("Connected to broker")
         options = SubscribeOptions(qos=1, noLocal=True)
-        for temp in mqtt_data:
-            client.subscribe(temp.topic, options=options)
-            print(f"subscribed to "{temp.topic}"")
+        client.subscribe(userdata.topic, options=options)
+        print(f"subscribed to {userdata.topic}")
     else:
         print(f"Connection failed rc{rc}")
 
