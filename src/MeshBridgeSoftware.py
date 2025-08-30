@@ -116,10 +116,11 @@ def main():
     mqtt_data = []
 
     for data in config["clients"]:
-        print(data)
-        if "node_number" not in data or "topic" not in data or "user_id" not in data or "channel_name" not in data:
-            print(f"Error: missing properties 'node_number' or 'topic' or 'user_id' or 'channel_name' for client {data}")
-            continue
+        #print(data)
+        for check in ["node_number", "topic", "user_id", "channel_name"]:
+            if check not in data:
+                print(f"Error: missing property '{check}' for client {data}")
+                continue
         # Create new client data
         #topic = data["json_topic"]
         topic = data["topic"] + "/2/e/" + data["channel_name"] + "/" + data["user_id"]
