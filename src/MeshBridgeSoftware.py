@@ -72,8 +72,8 @@ def message_handler(mqtt_data, client_data, data):
     #if it's the first time hearing it, transmit to every topic different from origin
     for temp in mqtt_data:
         if client_data.user_id != temp.user_id:
-            publish(client_data.client, temp.topic, data)
-
+            #publish(client_data.client, temp.topic, data)
+            pass
 
 
 def main():
