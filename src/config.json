@@ -9,12 +9,16 @@
         {
             "node_number": 2224783452,
             "user_id": "!849b805c",
-            "json_topic": "msh/master/2/json/MediumFast/!849b805c" 
+            "json_topic": "msh/master/2/json/MediumFast/!849b805c",
+            "channel_names": "MediumFast",
+            "topic" : "msh/master"
         },
         {
             "node_number": 3676919412,
             "user_id": "!db295674",
-            "json_topic": "msh/slave/2/json/LongFast/!db295674" 
+            "json_topic": "msh/slave/2/json/LongFast/!db295674",
+            "channel_name": "LongFast",
+            "topic" : "msh/slave"
         }
     ]
 }
