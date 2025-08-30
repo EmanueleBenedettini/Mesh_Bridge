@@ -156,7 +156,7 @@ def main():
         for client_data in mqtt_data: 
             while client_data.packet_queue.qsize() > 1:
                 packet = client_data.packet_queue.get()
-                if not history_keeper.check_presence(packet):
+                if not history_keeper.check_presence(packet.payload):
                     message_handler(mqtt_data, client_data, packet)
                     time.sleep(1) #idk how much time does it take to propagate :)
                 queue_emptied = True
