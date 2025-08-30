@@ -118,9 +118,12 @@ def main():
     for data in config["clients"]:
         #print(data)
         for check in ["node_number", "topic", "user_id", "channel_name"]:
+            fail = False
             if check not in data:
                 print(f"Error: missing property '{check}' for client {data}")
-                continue
+                fail = True
+        if fail:
+            continue    #if some data are missing, ignore this client
         # Create new client data
         #topic = data["json_topic"]
         topic = data["topic"] + "/2/e/" + data["channel_name"] + "/" + data["user_id"]
