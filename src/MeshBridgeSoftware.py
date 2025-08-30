@@ -61,11 +61,6 @@ def publish(client, topic, message):
     else:
         print("Failed to publish message")
 
-##just for testing
-#def handler(client, data):
-##    print(f"Handling message...")
-#    packet_queue.put(data)
-##    print("done handling")
 
 def message_handler(mqtt_data, client_data, data):
     #check if packet has already been received
@@ -142,7 +137,7 @@ def main():
         for client_data in mqtt_data: 
             while client_data.packet_queue.qsize() > 1:
                 packet = client_data.packet_queue.get()
-                if history_keeper.check_presence(packet):
+                if not history_keeper.check_presence(packet):
                     message_handler(mqtt_data, client_data, packet)
                 queue_emptied = True
         if not queue_emptied:   # If I did some work, don't sleep
