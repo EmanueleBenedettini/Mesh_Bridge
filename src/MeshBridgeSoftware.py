@@ -19,16 +19,16 @@ class PacketHistory:
         self.cue = []
         self.history_lenght = history_lenght
 
-    def add_new(self, packet):
-        self.cue.append(packet)
+    def add_new(self, data):
+        self.cue.append(data)
         if len(self.cue) > self.history_lenght:
             self.cue.pop(0)
 
-    def check_presence(self, packet):
-        if packet in self.cue:
+    def check_presence(self, data):
+        if data in self.cue:
             return True
         else:
-            self.add_new(packet)
+            self.add_new(data)
             return False
         
     #def maintain(self, time_difference=86400):
@@ -53,6 +53,7 @@ def on_connect(client, userdata, flags, rc):
         options = SubscribeOptions(qos=1, noLocal=True)
         for temp in mqtt_data:
             client.subscribe(temp.topic, options=options)
+            print(f"subscribed to "{temp.topic}"")
     else:
         print(f"Connection failed rc{rc}")
 
@@ -161,8 +162,8 @@ def main():
                     time.sleep(1) #idk how much time does it take to propagate :)
                 queue_emptied = True
         if not queue_emptied:   # If I did some work, don't sleep
-            print("Queue empty, waiting...")
-            time.sleep(5)   #do nothing
+            #print("Queue empty, waiting...")
+            time.sleep(1)   #do nothing
 
 
 if __name__ == "__main__":
