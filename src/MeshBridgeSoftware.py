@@ -3,6 +3,7 @@ import json, time
 from paho.mqtt import client as mqtt_client
 from paho.mqtt.subscribeoptions import SubscribeOptions
 from queue import Queue
+#from datetime import datetime
 
 class MqttClientData:
     def __init__(self, topic, node_id, user_id, client, max_cue_lenght=10, last_packet=None):
@@ -12,6 +13,23 @@ class MqttClientData:
         self.client = client
         self.packet_queue = Queue(maxsize=max_cue_lenght)
         self.last_packet = last_packet if last_packet is not None else {}
+
+class PacketHistory:
+    def __init__(self, history_lenght=100):
+        self.cue = []
+        self.history_lenght = history_lenght
+
+    def add_new(self, data):
+        self.cue.append(data)
+        if len(self.cue) > self.history_lenght:
+            self.cue.pop(0)
+
+    def check_presence(self, data):
+        if data in self.cue:
+            return True
+        else:
+            self.add_new(data)
+            return False
 
 
 def on_connect(client, userdata, flags, rc):
@@ -118,11 +136,14 @@ def main():
         # Start the loop for processing incoming messages and event callbacks
         client.loop_start()
 
+    history_keeper = PacketHistory()
     while True:
         queue_emptied = False
         for client_data in mqtt_data: 
             while client_data.packet_queue.qsize() > 1:
-                message_handler(mqtt_data, client_data, client_data.packet_queue.get())
+                packet = client_data.packet_queue.get()
+                if history_keeper.check_presence(packet):
+                    message_handler(mqtt_data, client_data, packet)
                 queue_emptied = True
         if not queue_emptied:   # If I did some work, don't sleep
             print("Queue empty, waiting...")
