@@ -69,7 +69,7 @@ def on_message(client, userdata, msg):
 
 def publish(client, topic, message):
     #result = client.publish(topic+"", json.dumps(message))
-    result = client.publish(topic+"", bytearray(message))
+    result = client.publish(topic+"", message.payload)
     result.wait_for_publish()
     if result[0] == 0:
         print(f"Successfully published")
